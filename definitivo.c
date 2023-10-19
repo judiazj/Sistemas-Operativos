@@ -9,6 +9,9 @@
 #include <unistd.h>
 #include <ctype.h>
 
+// Julian David Diaz Jaramillo
+// Isabel Cristina Ramirez Ramirez
+
 int main() {
     const int SIZE = 4096;
     const char *name = "OS"; // Nombre del área de memoria compartida
