@@ -1,13 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include <semaphore.h>
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <ctype.h>
 
 int main() {
     const int SIZE = 4096;
@@ -36,26 +36,22 @@ int main() {
     sem_t *sem_parent;
     sem_parent = sem_open("my_semaphore_parent", O_CREAT, 0666, 0); // Semáforo para el proceso padre
     sem_t *sem_child;
-    sem_child = sem_open("my_semaphore_child", O_CREAT, 0666, 1); // Semáforo para el proceso hijo
+    sem_child = sem_open("my_semaphore_child", O_CREAT, 0666, 0); // Semáforo para el proceso hijo
 
     int rc = fork();
 
     // Proceso Hijo
     if (rc == 0) {
-        sem_wait(sem_parent); // Esperar a que el proceso padre escriba los datos
+        while (1) {
+            sem_wait(sem_child); // Esperar a que el proceso padre escriba los datos
 
-        sem_wait(sem_child); // Esperar a que el semáforo esté disponible
+            // Convertir la cadena de texto a mayúsculas
+            for (int i = 0; ptr[i] != '\0'; i++) {
+                ptr[i] = toupper(ptr[i]);
+            }
 
-        // Convertir la cadena de texto a mayúsculas
-        int i;
-        for (i = 0; ptr[i] != '\0'; i++) {
-            ptr[i] = toupper(ptr[i]);
+            sem_post(sem_parent); // Liberar el semáforo para el proceso padre
         }
-
-        sem_post(sem_child); // Liberar el semáforo para el proceso padre
-        sem_post(sem_parent); // Liberar el semáforo para el proceso padre
-
-        sleep(1); // Pequeña pausa antes de terminar
     }
     // Proceso Padre
     else {
@@ -68,23 +64,17 @@ int main() {
 
             // Si el usuario escribe "salir", terminar el programa
             if (strcmp(texto, "salir\n") == 0) {
-                sem_post(sem_parent); // Asegurarse de que el proceso hijo también termine
+                sem_post(sem_child); // Asegurarse de que el proceso hijo también termine
                 break;
             }
-
-            sem_wait(sem_child); // Esperar a que el proceso hijo termine de convertir
 
             // Escribimos los bytes al área de memoria
             sprintf(ptr, "%s", texto);
 
             sem_post(sem_child); // Liberar el semáforo para el proceso hijo
-            sem_post(sem_parent); // Liberar el semáforo para el proceso hijo
-
-            sem_wait(sem_child); // Esperar a que el proceso hijo convierta
+            sem_wait(sem_parent); // Esperar a que el proceso hijo termine de convertir
 
             printf("Padre: Recibido desde el hijo: %s", ptr);
-
-            sem_post(sem_child); // Liberar el semáforo para el proceso hijo
         }
     }
 
