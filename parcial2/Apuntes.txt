@@ -1,0 +1,2 @@
+bits de las paginas: 20
+bits del desplazamiento: 12
