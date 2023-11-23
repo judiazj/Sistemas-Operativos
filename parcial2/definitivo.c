@@ -11,22 +11,6 @@ void mostrarBinarios(char arreglo[], int longitud) {
     printf("\n");
 }
 
-void printTLBEntry(char *TLB, int index) {
-    int *direccion = (int *)(TLB + index);
-    int *pagDecimal = (int *)(TLB + index + sizeof(int));
-    int *despDecimal = (int *)(TLB + index + 2 * sizeof(int));
-    char *pagBinario = (char *)(TLB + index + 3 * sizeof(int));
-    char *despBinario = (char *)(TLB + index + 3 * sizeof(int) + sizeof(pagBinario));
-
-    printf("Direccion: %d\n", *direccion);
-    printf("Pagina: %d\n", *pagDecimal);
-    printf("Desplazamiento: %d\n", *despDecimal);
-    printf("Pagina en binario: ");
-    mostrarBinarios(pagBinario, sizeof(pagBinario)/sizeof(char)); 
-    printf("Desplazamiento en binario: ");
-    mostrarBinarios(despBinario, sizeof(despBinario)/sizeof(char)); 
-}
-
 void decimal_a_binario(int decimal, int* binario) {
     int i = 0;
     while (i < 32) {
@@ -69,7 +53,7 @@ int main() {
 
         // Convertir la entrada a entero
         direccion = atoi(input);
-        
+        printf("Direccion: %d \n", direccion);
 
         start_time = clock();
 
@@ -80,8 +64,23 @@ int main() {
             int *direccionAuxiliar = (int *)(TLB + i);
             if (*direccionAuxiliar == direccion) {
                 estaLaDireccion = 1;
-                printf("TLB Hit\n");
-                printTLBEntry(TLB, i);
+                printf("TLB Hit\n");            
+                // Obtener los datos directamente del TLB
+                int pagDecimal, despDecimal;
+                char pagBinario[20], despBinario[12];
+
+                memcpy(&pagDecimal, TLB + i + sizeof(int), sizeof(int));
+                memcpy(&despDecimal, TLB + i + 2 * sizeof(int), sizeof(int));
+                memcpy(&pagBinario, TLB + i + 3 * sizeof(int), sizeof(pagBinario));
+                memcpy(&despBinario, TLB + i + 3 * sizeof(int) + sizeof(pagBinario), sizeof(despBinario));
+
+                printf("Pagina: %d\n", pagDecimal);
+                printf("Desplazamiento: %d\n", despDecimal);
+
+                printf("Pagina en binario: ");
+                mostrarBinarios(pagBinario, sizeof(pagBinario) / sizeof(char));
+                printf("Desplazamiento en binario: ");
+                mostrarBinarios(despBinario, sizeof(despBinario) / sizeof(char));
                 break;
             }
         }
@@ -91,7 +90,7 @@ int main() {
             if (ptr + longitud > 230) {
                 ptr = 0;
             }
-            printf("Direccion: %d \n", direccion);
+            
             printf("TLB Miss\n");
 
             decimal_a_binario(direccion, binario);
