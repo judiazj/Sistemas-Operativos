@@ -1,3 +1,6 @@
+// Isabel Cristina Ramirez Ramirez - 
+// Julian David Diaz Jaramillo
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
