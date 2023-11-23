@@ -33,6 +33,11 @@ int main() {
     int direccion;
     int binario[32]; 
 
+    char *TLB = (char *) malloc(230);
+    int* ptrInt;
+    char* ptrPag[20];
+    char* ptrDesp[12];
+
     while (1) {
         printf("Ingrese la dirección virtual: ");
         scanf("%s", input);
@@ -48,29 +53,37 @@ int main() {
 
         decimal_a_binario(direccion, binario);
 
-        char paginaBinario[20]; 
+        char pagBinario[20]; 
         char despBinario[12]; 
 
         for(int i=31, j=0; i >=11; i--, j++){
-            paginaBinario[j] = (char) binario[i] + '0'; // Convertir el bit a su representación ASCII ('0' o '1')
+            pagBinario[j] = (char) binario[i] + '0'; // Convertir el bit a su representación ASCII ('0' o '1')
         }
 
         for(int j=0, i=11; i>=0; i--, j++){
             despBinario[j] = (char)binario[i] + '0'; // Convertir el bit a su representación ASCII ('0' o '1')
         }
 
-        printf("Pagina: %d\n", binario_a_decimal(paginaBinario, sizeof(paginaBinario)/sizeof(char)));
-        printf("Desplazamiento: %d\n", binario_a_decimal(despBinario, sizeof(despBinario)/sizeof(char)));
+        int pagDecimal = binario_a_decimal(pagBinario, sizeof(pagBinario)/sizeof(char));
+        int despDecimal = binario_a_decimal(despBinario, sizeof(despBinario)/sizeof(char));
+        printf("Pagina: %d\n", pagDecimal);
+        printf("Desplazamiento: %d\n", despDecimal);
 
         printf("Pagina en binario: ");
-        mostrarBinarios(paginaBinario, sizeof(paginaBinario)/sizeof(char));
+        mostrarBinarios(pagBinario, sizeof(pagBinario)/sizeof(char));
         printf("Desplazamiento en binario: ");
         mostrarBinarios(despBinario, sizeof(despBinario)/sizeof(char));
 
     
         // Aquí puedes continuar con el resto de la lógica para el programa
         // Realizar la traducción de dirección, TLB, etc.
-    }
+        memcpy(TLB, &direccion, sizeof(int));
+        memcpy(TLB + 1, &pagDecimal, sizeof(int));
+        memcpy(TLB + 2, &despDecimal, sizeof(int));
+        memcpy(TLB + 3, &pagBinario, sizeof(pagBinario));
+        memcpy(TLB + 4, &despBinario, sizeof(despBinario));
 
+    }
+    free(TLB);
     return 0;
 }
